@@ -1,10 +1,49 @@
 /* Apply background and center content */
 body {
-  background-color: #ffffff; /* same as manifest background_color */
-  color: black;
+  /* Make the entire page a flex container */
+body {
   font-family: 'Poppins', sans-serif;
-  text-align: center;
-  padding: 20px;
+  background-color: #ffffff;
+  color: black;
+
+  /* Flexbox centering */
+  display: flex;
+  flex-direction: column; /* stack content vertically */
+  justify-content: center; /* vertical centering */
+  align-items: center;     /* horizontal centering */
+
+  /* Take full viewport height */
+  height: 100vh;
+  margin: 0; /* remove default body margin */
+}
+
+/* Optional styling for spacing */
+h1 {
+  margin-bottom: 10px;
+}
+
+p {
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #317EFB;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #255bbf;
+}
+
+img {
+  margin: 10px;
+  border-radius: 12px;
+}
+
 }
 
 /* Theme color for headings */
