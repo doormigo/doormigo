@@ -1,75 +1,26 @@
-/* Apply background and center content */
 body {
-  /* Make the entire page a flex container */
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #ffffff;
-  color: black;
-
-  /* Flexbox centering */
-  display: flex;
-  flex-direction: column; /* stack content vertically */
-  justify-content: center; /* vertical centering */
-  align-items: center;     /* horizontal centering */
-
-  /* Take full viewport height */
-  height: 100vh;
-  margin: 0; /* remove default body margin */
+  font-family: 'Poppins', sans-serif !important;
+  color: black !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  background-color: #ffffff !important;
 }
 
-/* Optional styling for spacing */
-h1 {
-  margin-bottom: 10px;
-}
-
-p {
-  margin-bottom: 20px;
+h1, p, button {
+  font-family: 'Poppins', sans-serif !important;
+  color: black !important;
+  text-align: center !important;
 }
 
 button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  background-color: #317EFB;
-  color: white;
-  cursor: pointer;
+  background-color: #317EFB !important;
+  color: white !important;
 }
 
 button:hover {
-  background-color: #255bbf;
-}
-
-img {
-  margin: 10px;
-  border-radius: 12px;
-}
-
-}
-
-/* Theme color for headings */
-h1 {
-  color: #000000; /* matches manifest theme_color */
-}
-
-/* Style the icons */
-img {
-  margin: 10px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0);
-}
-
-/* Button styled with theme color */
-button {
-  background-color: #000000;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 15px;
-}
-
-button:hover {
-  background-color: #000000;
+  background-color: #255bbf !important;
 }
