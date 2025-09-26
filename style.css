@@ -2,7 +2,9 @@
 body {
   background-color: #ffffff; /* same as manifest background_color */
   color: #000;
-  font-family: Inter, sans-serif;
+  font-family: 'Inter', sans-serif;
+}
+
   text-align: center;
   padding: 20px;
 }
