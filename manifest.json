@@ -1,10 +1,10 @@
 {
-  "name": "Dormigo!",
-  "short_name": "Door Helper",
-  "start_url": "/",
+  "name": "This is Doormigo!",
+  "short_name": "Dormigo",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3d8eb9",
+  "theme_color": "#317EFB",
   "icons": [
     {
       "src": "icon-192.png",
