@@ -1,7 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoorBuddy 🚪</title>
+
+  <!-- Theme color for browser UI -->
+  <meta name="theme-color" content="#317EFB">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Link to CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
@@ -9,27 +22,21 @@
       .catch(err => console.log('Service Worker Failed:', err));
     }
   </script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My First PWA</title>
-  <meta name="theme-color" content="#0d0d0d">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  
 </head>
 <body>
-  <h1>This is Doormigo!</h1>
-  <p>Install the app on your device!.</p>
+  <h1>DoorBuddy 🚪</h1>
+  <p>Hello! This app can be installed on your device.</p>
 
-  <!-- App icons -->
+  <!-- Show app icons -->
   <img src="icon-192.png" alt="App Icon Small" width="96">
   <img src="icon-512.png" alt="App Icon Large" width="128">
 
-  <!-- Themed button -->
+  <!-- Example button -->
   <div>
     <button>Click Me!</button>
   </div>
 
+  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>
