@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('Service Worker Registered'))
-    .catch(err => console.log('Service Worker Failed:', err));
-  }
-</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+      .then(() => console.log('Service Worker Registered'))
+      .catch(err => console.log('Service Worker Failed:', err));
+    }
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My First PWA</title>
@@ -17,6 +17,11 @@
 <body>
   <h1>My First PWA 🚀</h1>
   <p>Hello! This app can be installed on your device.</p>
+
+  <!-- Add your icons here -->
+  <img src="icon-192.png" alt="App Icon Small" width="96">
+  <img src="icon-512.png" alt="App Icon Large" width="128">
+
   <script src="script.js"></script>
 </body>
 </html>
