@@ -1,4 +1,4 @@
-const CACHE_NAME = 'doorbuddy-cache-v1';
+const CACHE_NAME = 'doormmigo-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
