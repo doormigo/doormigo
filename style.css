@@ -1,7 +1,7 @@
 /* Apply background and center content */
 body {
   background-color: #ffffff; /* same as manifest background_color */
-  color: #333;
+  color: #000;
   font-family: Inter, sans-serif;
   text-align: center;
   padding: 20px;
@@ -9,19 +9,19 @@ body {
 
 /* Theme color for headings */
 h1 {
-  color: #0d0d0d; /* matches manifest theme_color */
+  color: #000000; /* matches manifest theme_color */
 }
 
 /* Style the icons */
 img {
   margin: 10px;
   border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0px 4px 8px rgba(0,0,0,0);
 }
 
 /* Button styled with theme color */
 button {
-  background-color: #0d0d0d;
+  background-color: #000000;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -32,5 +32,5 @@ button {
 }
 
 button:hover {
-  background-color: #0d0d0d;
+  background-color: #000000;
 }
