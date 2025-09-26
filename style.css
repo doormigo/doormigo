@@ -1,9 +1,8 @@
 /* Apply background and center content */
 body {
   background-color: #ffffff; /* same as manifest background_color */
-  color: #000;
-  font-family: 'Inter', sans-serif;
   color: black;
+  font-family: 'Inter', sans-serif;
   text-align: center;
   padding: 20px;
 }
