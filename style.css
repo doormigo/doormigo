@@ -1,8 +1,36 @@
+/* Apply background and center content */
 body {
+  background-color: #ffffff; /* same as manifest background_color */
+  color: #333;
   font-family: Arial, sans-serif;
   text-align: center;
-  margin: 50px;
+  padding: 20px;
 }
+
+/* Theme color for headings */
 h1 {
-  color: #0078d7;
+  color: #317EFB; /* matches manifest theme_color */
+}
+
+/* Style the icons */
+img {
+  margin: 10px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Button styled with theme color */
+button {
+  background-color: #317EFB;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+button:hover {
+  background-color: #255bbf;
 }
