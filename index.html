@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/DoorBuddyV2/service-worker.js')
-        .then(() => console.log('Service Worker Registered'))
-        .catch(err => console.log('Service Worker Failed:', err));
-    }
-  </script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Doormigo!</title>
@@ -28,38 +19,85 @@
 </head>
 <body>
   <h1>Doormigo!</h1>
-  <p>Install this app on your device by clicking the button below.</p>
 
-  <!-- Install Button -->
-  <div>
+  <!-- Website-only section -->
+  <div class="web-only">
+    <p>Install this app on your device by clicking the button below.</p>
     <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
       Install App
     </button>
   </div>
 
-  <!-- Script -->
+  <!-- App-only section -->
+  <div class="app-only" style="display:none;">
+    <h2>App Dashboard</h2>
+    <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
+      Connect to Bluetooth
+    </button>
+    <div id="bluetoothStatus">Not connected</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+
+  <!-- Service Worker Registration & Install Button Logic -->
   <script>
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/DoorBuddyV2/service-worker.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Failed:', err));
+    }
+
+    // Detect if running as PWA
+    function isInstalledPWA() {
+      return window.matchMedia('(display-mode: standalone)').matches
+          || window.navigator.standalone === true;
+    }
+
+    // Handle install button for website
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
-    // Listen for the install prompt
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'block'; // Show button
+      if (!isInstalledPWA()) {
+        installBtn.style.display = 'block';
+      }
     });
 
-    // Handle button click
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const result = await deferredPrompt.userChoice;
         console.log('User choice:', result.outcome);
         deferredPrompt = null;
-        installBtn.style.display = 'none'; // Hide after install
+        installBtn.style.display = 'none';
+      }
+    });
+
+    // Show app-only dashboard when installed
+    if (isInstalledPWA()) {
+      document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.app-only').forEach(el => el.style.display = 'block');
+    }
+
+    // Web Bluetooth button functionality
+    const connectBtn = document.getElementById('connectBluetooth');
+    const statusDiv = document.getElementById('bluetoothStatus');
+
+    connectBtn?.addEventListener('click', async () => {
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true
+        });
+        statusDiv.textContent = `Connected to: ${device.name}`;
+      } catch (err) {
+        statusDiv.textContent = 'Connection failed';
+        console.error(err);
       }
     });
   </script>
 </body>
 </html>
-
