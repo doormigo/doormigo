@@ -1,39 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <!-- Service Worker -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch(err => console.log('Service Worker Failed:', err));
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Failed:', err));
     }
   </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doormigo! </title>
- 
+  <title>Doormigo!</title>
+
   <!-- Theme color for browser UI -->
   <meta name="theme-color" content="#317EFB">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
- <link rel="manifest" href="manifest.json">
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+
   <!-- Link to CSS -->
   <link rel="stylesheet" href="style.css">
-  
- 
 </head>
 <body>
-  <h1>Doormigo! </h1>
-  <p>Install this app on your device by clicking the button!.</p>
+  <h1>Doormigo!</h1>
+  <p>Install this app on your device by clicking the button below.</p>
 
-  <!-- Example button -->
+  <!-- Install Button -->
   <div>
-    <button>Install</button>
+    <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
+      Install App
+    </button>
   </div>
 
   <!-- Script -->
-  <script src="script.js"></script>
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // Listen for the install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block'; // Show button
+    });
+
+    // Handle button click
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log('User choice:', result.outcome);
+        deferredPrompt = null;
+        installBtn.style.display = 'none'; // Hide after install
+      }
+    });
+  </script>
 </body>
 </html>
+
