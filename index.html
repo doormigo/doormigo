@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +23,9 @@
 
   <!-- Website-only section -->
   <div class="web-only">
-    <p>Install this app on your device by clicking the button below! If you are on your mobile device, tap share - add to homescreen! </p>
+    <p id="installMessage">
+      Install this app on your device:
+    </p>
     <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
       Install App
     </button>
@@ -56,27 +58,39 @@
           || window.navigator.standalone === true;
     }
 
-    // Handle install button for website
+    // Detect iOS
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
+    const installMessage = document.getElementById('installMessage');
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (!isInstalledPWA()) {
-        installBtn.style.display = 'block';
-      }
-    });
+    if (isIos && !isInStandaloneMode) {
+      // iOS Safari: no install button, just manual instructions
+      installBtn.style.display = 'none';
+      installMessage.textContent = "On iPhone/iPad: Tap the Share button in Safari and choose 'Add to Home Screen' to install the app.";
+    } else {
+      // Android/desktop: use beforeinstallprompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (!isInstalledPWA()) {
+          installBtn.style.display = 'block';
+          installMessage.textContent = "Click below to install this app:";
+        }
+      });
 
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log('User choice:', result.outcome);
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-      }
-    });
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const result = await deferredPrompt.userChoice;
+          console.log('User choice:', result.outcome);
+          deferredPrompt = null;
+          installBtn.style.display = 'none';
+        }
+      });
+    }
 
     // Show app-only dashboard when installed
     if (isInstalledPWA()) {
@@ -102,3 +116,4 @@
   </script>
 </body>
 </html>
+```
