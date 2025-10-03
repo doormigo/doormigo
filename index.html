@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +22,7 @@
 
   <!-- Website-only section -->
   <div class="web-only">
-    <p id="installMessage">
-      Install this app on your device:
-    </p>
+    <p id="installMessage"></p>
     <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
       Install App
     </button>
@@ -43,7 +40,6 @@
   <!-- Scripts -->
   <script src="script.js"></script>
 
-  <!-- Service Worker Registration & Install Button Logic -->
   <script>
     // Service Worker registration
     if ('serviceWorker' in navigator) {
@@ -52,13 +48,11 @@
         .catch(err => console.log('Service Worker Failed:', err));
     }
 
-    // Detect if running as PWA
     function isInstalledPWA() {
       return window.matchMedia('(display-mode: standalone)').matches
           || window.navigator.standalone === true;
     }
 
-    // Detect iOS
     const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
 
@@ -67,11 +61,11 @@
     const installMessage = document.getElementById('installMessage');
 
     if (isIos && !isInStandaloneMode) {
-      // iOS Safari: no install button, just manual instructions
+      // iOS Safari
       installBtn.style.display = 'none';
-      installMessage.textContent = "On iPhone/iPad: Tap the Share button in Safari and choose 'Add to Home Screen' to install the app.";
+      installMessage.textContent = "📱 On iPhone/iPad: Tap the Share button in Safari and choose 'Add to Home Screen' to install this app.";
     } else {
-      // Android/desktop: use beforeinstallprompt
+      // Android/desktop
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -98,15 +92,13 @@
       document.querySelectorAll('.app-only').forEach(el => el.style.display = 'block');
     }
 
-    // Web Bluetooth button functionality
+    // Web Bluetooth functionality
     const connectBtn = document.getElementById('connectBluetooth');
     const statusDiv = document.getElementById('bluetoothStatus');
 
     connectBtn?.addEventListener('click', async () => {
       try {
-        const device = await navigator.bluetooth.requestDevice({
-          acceptAllDevices: true
-        });
+        const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
         statusDiv.textContent = `Connected to: ${device.name}`;
       } catch (err) {
         statusDiv.textContent = 'Connection failed';
@@ -116,4 +108,3 @@
   </script>
 </body>
 </html>
-```
