@@ -36,11 +36,21 @@
     <div class="app-container">
       <h2>Doormigo Dashboard</h2>
 
-      <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
-        Connect to Bluetooth
-      </button>
+      <!-- Password Setup / Prompt -->
+      <div id="passwordContainer">
+        <p id="passwordStatus">Checking password...</p>
+        <input type="password" id="devicePassword" placeholder="Enter password" style="padding:5px; margin:5px 0;">
+        <button id="checkPasswordBtn" style="background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">Submit</button>
+      </div>
 
-      <div id="bluetoothStatus">Not connected</div>
+      <!-- Bluetooth Connect Button -->
+      <div id="controlPanel" style="display:none;">
+        <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
+          Connect to Bluetooth
+        </button>
+        <div id="bluetoothStatus">Not connected</div>
+      </div>
+
     </div>
   </div>
 
@@ -90,6 +100,54 @@
 
     document.addEventListener('DOMContentLoaded', updateUI);
     document.addEventListener('visibilitychange', updateUI);
+
+    // --- Password Setup ---
+    const PASSWORD_KEY = 'devicePassword';
+    let storedPassword = localStorage.getItem(PASSWORD_KEY);
+
+    const passwordContainer = document.getElementById('passwordContainer');
+    const passwordStatus = document.getElementById('passwordStatus');
+    const checkPasswordBtn = document.getElementById('checkPasswordBtn');
+    const passwordInput = document.getElementById('devicePassword');
+    const controlPanel = document.getElementById('controlPanel');
+
+    function showPasswordPrompt() {
+      passwordContainer.style.display = 'block';
+      if (!storedPassword) {
+        passwordStatus.textContent = "Set a new password for this device:";
+        checkPasswordBtn.textContent = "Set Password";
+      } else {
+        passwordStatus.textContent = "Enter your device password:";
+        checkPasswordBtn.textContent = "Submit";
+      }
+    }
+
+    showPasswordPrompt();
+
+    checkPasswordBtn.addEventListener('click', () => {
+      const entered = passwordInput.value.trim();
+      if (!entered) return;
+
+      if (!storedPassword) {
+        // First-time password setup
+        localStorage.setItem(PASSWORD_KEY, entered);
+        storedPassword = entered;
+        passwordStatus.textContent = "Password set! Access granted.";
+        passwordContainer.style.display = "none";
+        controlPanel.style.display = "block";
+      } else {
+        // Verify password
+        if (entered === storedPassword) {
+          passwordStatus.textContent = "Password correct!";
+          passwordContainer.style.display = "none";
+          controlPanel.style.display = "block";
+        } else {
+          passwordStatus.textContent = "Incorrect password!";
+        }
+      }
+
+      passwordInput.value = ""; // clear input
+    });
 
     // --- Web Bluetooth functionality ---
     const connectBtn = document.getElementById('connectBluetooth');
