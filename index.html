@@ -14,8 +14,70 @@
   <!-- Manifest -->
   <link rel="manifest" href="/DoorBuddyV2/manifest.json">
 
-  <!-- Link to CSS -->
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* General App Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #ffffff;
+      padding: 20px;
+    }
+
+    h1, h2, p, button {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+
+    button {
+      background-color: #317EFB;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #255bbf;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .card {
+      width: 100%;
+      background-color: #f7f7f7;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
   <h1>Doormigo!</h1>
@@ -26,31 +88,30 @@
       Install this app on your device by clicking the button below.  
       If you are on a mobile device, press the Share button in Safari or use Chrome's install prompt and select "Add to Home Screen".
     </p>
-    <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
+    <button id="installBtn" style="display:none;">
       Install App
     </button>
   </div>
 
-<!-- App-only section -->
-<div class="app-only" style="display:none;">
-  <div class="app-container">
-    <h2>Doormigo Dashboard</h2>
+  <!-- App-only section -->
+  <div class="app-only" style="display:none;">
+    <div class="app-container">
+      <h2>Doormigo Dashboard</h2>
 
-    <!-- Password Setup / Prompt -->
-    <div id="passwordContainer" class="card">
-      <p id="passwordStatus">Checking password...</p>
-      <input type="password" id="devicePassword" placeholder="Enter password">
-      <button id="checkPasswordBtn">Submit</button>
-    </div>
+      <!-- Password Setup / Prompt -->
+      <div id="passwordContainer" class="card">
+        <p id="passwordStatus">Checking password...</p>
+        <input type="password" id="devicePassword" placeholder="Enter password">
+        <button id="checkPasswordBtn">Submit</button>
+      </div>
 
-    <!-- Bluetooth Connect Button -->
-    <div id="controlPanel" class="card" style="display:none;">
-      <button id="connectBluetooth">Connect to Bluetooth</button>
-      <div id="bluetoothStatus">Not connected</div>
+      <!-- Bluetooth Connect Button -->
+      <div id="controlPanel" class="card" style="display:none;">
+        <button id="connectBluetooth">Connect to Bluetooth</button>
+        <div id="bluetoothStatus">Not connected</div>
+      </div>
     </div>
   </div>
-</div>
-
 
   <script>
     // --- Service Worker Registration ---
@@ -73,9 +134,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (!isInstalledPWA()) {
-        installBtn.style.display = 'block';
-      }
+      if (!isInstalledPWA()) installBtn.style.display = 'block';
     });
 
     installBtn.addEventListener('click', async () => {
@@ -92,7 +151,7 @@
     function updateUI() {
       if (isInstalledPWA()) {
         document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.app-only').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.app-only').forEach(el => el.style.display = 'flex');
       }
     }
 
@@ -110,7 +169,7 @@
     const controlPanel = document.getElementById('controlPanel');
 
     function showPasswordPrompt() {
-      passwordContainer.style.display = 'block';
+      passwordContainer.style.display = 'flex';
       if (!storedPassword) {
         passwordStatus.textContent = "Set a new password for this device:";
         checkPasswordBtn.textContent = "Set Password";
@@ -127,24 +186,22 @@
       if (!entered) return;
 
       if (!storedPassword) {
-        // First-time password setup
         localStorage.setItem(PASSWORD_KEY, entered);
         storedPassword = entered;
         passwordStatus.textContent = "Password set! Access granted.";
         passwordContainer.style.display = "none";
-        controlPanel.style.display = "block";
+        controlPanel.style.display = "flex";
       } else {
-        // Verify password
         if (entered === storedPassword) {
           passwordStatus.textContent = "Password correct!";
           passwordContainer.style.display = "none";
-          controlPanel.style.display = "block";
+          controlPanel.style.display = "flex";
         } else {
           passwordStatus.textContent = "Incorrect password!";
         }
       }
 
-      passwordInput.value = ""; // clear input
+      passwordInput.value = "";
     });
 
     // --- Web Bluetooth functionality ---
