@@ -31,14 +31,19 @@
     </button>
   </div>
 
-  <!-- App-only section -->
-  <div class="app-only" style="display:none;">
-    <h2>App Dashboard</h2>
-    <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
+ <!-- App-only section -->
+<div class="app-only" style="display:none;">
+  <div class="app-container">
+    <h2>Doormigo Dashboard</h2>
+
+    <button id="connectBluetooth">
       Connect to Bluetooth
     </button>
+
     <div id="bluetoothStatus">Not connected</div>
   </div>
+</div>
+
 
   <script>
     // --- Service Worker Registration ---
