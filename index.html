@@ -24,26 +24,25 @@
   <div class="web-only">
     <p id="installMessage">
       Install this app on your device by clicking the button below.  
-      If you are on your mobile device, press the Share button in Safari and select "Add to Home Screen".
+      If you are on a mobile device, press the Share button in Safari or use Chrome's install prompt and select "Add to Home Screen".
     </p>
     <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
       Install App
     </button>
   </div>
 
- <!-- App-only section -->
-<div class="app-only" style="display:none;">
-  <div class="app-container">
-    <h2>Doormigo Dashboard</h2>
+  <!-- App-only section -->
+  <div class="app-only" style="display:none;">
+    <div class="app-container">
+      <h2>Doormigo Dashboard</h2>
 
-    <button id="connectBluetooth">
-      Connect to Bluetooth
-    </button>
+      <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
+        Connect to Bluetooth
+      </button>
 
-    <div id="bluetoothStatus">Not connected</div>
+      <div id="bluetoothStatus">Not connected</div>
+    </div>
   </div>
-</div>
-
 
   <script>
     // --- Service Worker Registration ---
@@ -59,10 +58,10 @@
           || window.navigator.standalone === true;
     }
 
+    // --- Install Button ---
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
-    // --- Install button (for Android/desktop only) ---
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -81,7 +80,7 @@
       }
     });
 
-    // --- Switch UI when app is installed ---
+    // --- Show App Dashboard when PWA is installed ---
     function updateUI() {
       if (isInstalledPWA()) {
         document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
@@ -97,42 +96,25 @@
     const statusDiv = document.getElementById('bluetoothStatus');
 
     connectBtn?.addEventListener('click', async () => {
-      try {
-        const device = await navigator.bluetooth.requestDevice({
-          acceptAllDevices: true
-        });
-        statusDiv.textContent = `Connected to: ${device.name}`;
-      } catch (err) {
-        statusDiv.textContent = 'Connection failed';
-        console.error(err);
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+      if (isIos) {
+        statusDiv.textContent = "Bluetooth is not supported on iPhone/iPad.";
+      } else if (!navigator.bluetooth) {
+        statusDiv.textContent = "Bluetooth is not supported in this browser.";
+        connectBtn.style.display = "none";
+      } else {
+        try {
+          const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true
+          });
+          statusDiv.textContent = `Connected to: ${device.name || 'Unknown device'}`;
+        } catch (err) {
+          statusDiv.textContent = 'Connection failed';
+          console.error(err);
+        }
       }
     });
-const connectBtn = document.getElementById('connectBluetooth');
-const statusDiv = document.getElementById('bluetoothStatus');
-
-// Detect iOS
-const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-
-connectBtn?.addEventListener('click', async () => {
-  if (isIos) {
-    statusDiv.textContent = "Bluetooth is not supported on iPhone/iPad.";
-  } else if (!navigator.bluetooth) {
-    statusDiv.textContent = "Bluetooth is not supported in this browser.";
-    connectBtn.style.display = "none"; // optional: hide button
-  } else {
-    // Web Bluetooth flow for supported devices/browsers
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true
-      });
-      statusDiv.textContent = `Connected to: ${device.name || 'Unknown device'}`;
-    } catch (err) {
-      statusDiv.textContent = 'Connection failed';
-      console.error(err);
-    }
-  }
-});
-
   </script>
 </body>
 </html>
