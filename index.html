@@ -22,7 +22,10 @@
 
   <!-- Website-only section -->
   <div class="web-only">
-    <p id="installMessage"></p>
+    <p id="installMessage">
+      Install this app on your device by clicking the button below.  
+      If you are on your mobile device, press the Share button in Safari and select "Add to Home Screen".
+    </p>
     <button id="installBtn" style="display:none; background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">
       Install App
     </button>
@@ -37,68 +40,62 @@
     <div id="bluetoothStatus">Not connected</div>
   </div>
 
-  <!-- Scripts -->
-  <script src="script.js"></script>
-
   <script>
-    // Service Worker registration
+    // --- Service Worker Registration ---
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/DoorBuddyV2/service-worker.js')
         .then(() => console.log('Service Worker Registered'))
         .catch(err => console.log('Service Worker Failed:', err));
     }
 
+    // --- Helpers ---
     function isInstalledPWA() {
       return window.matchMedia('(display-mode: standalone)').matches
           || window.navigator.standalone === true;
     }
 
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-    const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
-
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
-    const installMessage = document.getElementById('installMessage');
 
-    if (isIos && !isInStandaloneMode) {
-      // iOS Safari
-      installBtn.style.display = 'none';
-      installMessage.textContent = "📱 On iPhone/iPad: Tap the Share button in Safari and choose 'Add to Home Screen' to install this app.";
-    } else {
-      // Android/desktop
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (!isInstalledPWA()) {
-          installBtn.style.display = 'block';
-          installMessage.textContent = "Click below to install this app:";
-        }
-      });
+    // --- Install button (for Android/desktop only) ---
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isInstalledPWA()) {
+        installBtn.style.display = 'block';
+      }
+    });
 
-      installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const result = await deferredPrompt.userChoice;
-          console.log('User choice:', result.outcome);
-          deferredPrompt = null;
-          installBtn.style.display = 'none';
-        }
-      });
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log('User choice:', result.outcome);
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      }
+    });
+
+    // --- Switch UI when app is installed ---
+    function updateUI() {
+      if (isInstalledPWA()) {
+        document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.app-only').forEach(el => el.style.display = 'block');
+      }
     }
 
-    // Show app-only dashboard when installed
-    if (isInstalledPWA()) {
-      document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.app-only').forEach(el => el.style.display = 'block');
-    }
+    document.addEventListener('DOMContentLoaded', updateUI);
+    document.addEventListener('visibilitychange', updateUI);
 
-    // Web Bluetooth functionality
+    // --- Web Bluetooth functionality ---
     const connectBtn = document.getElementById('connectBluetooth');
     const statusDiv = document.getElementById('bluetoothStatus');
 
     connectBtn?.addEventListener('click', async () => {
       try {
-        const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+        const device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true
+        });
         statusDiv.textContent = `Connected to: ${device.name}`;
       } catch (err) {
         statusDiv.textContent = 'Connection failed';
