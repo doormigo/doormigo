@@ -107,6 +107,32 @@
         console.error(err);
       }
     });
+const connectBtn = document.getElementById('connectBluetooth');
+const statusDiv = document.getElementById('bluetoothStatus');
+
+// Detect iOS
+const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+connectBtn?.addEventListener('click', async () => {
+  if (isIos) {
+    statusDiv.textContent = "Bluetooth is not supported on iPhone/iPad.";
+  } else if (!navigator.bluetooth) {
+    statusDiv.textContent = "Bluetooth is not supported in this browser.";
+    connectBtn.style.display = "none"; // optional: hide button
+  } else {
+    // Web Bluetooth flow for supported devices/browsers
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true
+      });
+      statusDiv.textContent = `Connected to: ${device.name || 'Unknown device'}`;
+    } catch (err) {
+      statusDiv.textContent = 'Connection failed';
+      console.error(err);
+    }
+  }
+});
+
   </script>
 </body>
 </html>
