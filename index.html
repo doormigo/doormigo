@@ -31,28 +31,26 @@
     </button>
   </div>
 
-  <!-- App-only section -->
-  <div class="app-only" style="display:none;">
-    <div class="app-container">
-      <h2>Doormigo Dashboard</h2>
+<!-- App-only section -->
+<div class="app-only" style="display:none;">
+  <div class="app-container">
+    <h2>Doormigo Dashboard</h2>
 
-      <!-- Password Setup / Prompt -->
-      <div id="passwordContainer">
-        <p id="passwordStatus">Checking password...</p>
-        <input type="password" id="devicePassword" placeholder="Enter password" style="padding:5px; margin:5px 0;">
-        <button id="checkPasswordBtn" style="background:#317EFB; color:white; padding:10px; border:none; border-radius:6px;">Submit</button>
-      </div>
+    <!-- Password Setup / Prompt -->
+    <div id="passwordContainer" class="card">
+      <p id="passwordStatus">Checking password...</p>
+      <input type="password" id="devicePassword" placeholder="Enter password">
+      <button id="checkPasswordBtn">Submit</button>
+    </div>
 
-      <!-- Bluetooth Connect Button -->
-      <div id="controlPanel" style="display:none;">
-        <button id="connectBluetooth" style="background:#0d0d0d; color:white; padding:10px; border:none; border-radius:6px;">
-          Connect to Bluetooth
-        </button>
-        <div id="bluetoothStatus">Not connected</div>
-      </div>
-
+    <!-- Bluetooth Connect Button -->
+    <div id="controlPanel" class="card" style="display:none;">
+      <button id="connectBluetooth">Connect to Bluetooth</button>
+      <div id="bluetoothStatus">Not connected</div>
     </div>
   </div>
+</div>
+
 
   <script>
     // --- Service Worker Registration ---
