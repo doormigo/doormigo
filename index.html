@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Manifest -->
-  <link rel="manifest" href="/DoorBuddyV2/manifest.json">
+  <link rel="manifest" href="/doormigo/manifest.json">
 
   <style>
     /* General App Styles */
@@ -116,7 +116,7 @@
   <script>
     // --- Service Worker Registration ---
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/DoorBuddyV2/service-worker.js')
+      navigator.serviceWorker.register('/doormigo/service-worker.js')
         .then(() => console.log('Service Worker Registered'))
         .catch(err => console.log('Service Worker Failed:', err));
     }
