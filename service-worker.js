@@ -1,10 +1,10 @@
 const CACHE_NAME = 'doormmigo-cache-v1';
 const urlsToCache = [
-  '/DoorBuddyV2/index.html',
-  '/DoorBuddyV2/style.css',
-  '/DoorBuddyV2/script.js',
-  '/DoorBuddyV2/icon-192.png',
-  '/DoorBuddyV2/icon-512.png'
+  '/doormigo/index.html',
+  '/doormigo/style.css',
+  '/doormigo/script.js',
+  '/doormigo/icon-192.png',
+  '/doormigo/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
