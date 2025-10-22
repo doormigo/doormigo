@@ -3,19 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doormigo!</title>
-
-  <!-- Theme color for browser UI -->
+  <title>DoorMigo!</title>
   <meta name="theme-color" content="#317EFB">
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- Manifest -->
-  <link rel="manifest" href="/doormigo/manifest.json">
-
   <style>
-    /* General App Styles */
     body {
       font-family: 'Poppins', sans-serif;
       color: black;
@@ -28,12 +19,7 @@
       background-color: #ffffff;
       padding: 20px;
     }
-
-    h1, h2, p, button {
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-    }
-
+    h1, h2, p, button { text-align: center; }
     button {
       background-color: #317EFB;
       color: white;
@@ -44,20 +30,8 @@
       font-weight: 600;
       margin-top: 10px;
     }
-
-    button:hover {
-      background-color: #255bbf;
-    }
-
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      width: 100%;
-      max-width: 400px;
-    }
-
+    button:hover { background-color: #255bbf; }
+    .app-container { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; max-width: 400px; }
     .card {
       width: 100%;
       background-color: #f7f7f7;
@@ -68,7 +42,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     input[type="password"] {
       width: 100%;
       padding: 10px;
@@ -80,85 +53,36 @@
   </style>
 </head>
 <body>
-  <h1>Doormigo!</h1>
+  <h1>DoorMigo!</h1>
 
-  <!-- Website-only section -->
-  <div class="web-only">
-    <p id="installMessage">
-      Install this app on your device by clicking the button below.  
-      If you are on a mobile device, press the Share button in Safari or use Chrome's install prompt and select "Add to Home Screen".
-    </p>
-    <button id="installBtn" style="display:none;">
-      Install App
-    </button>
-  </div>
+  <div class="app-container">
+    <!-- Password Prompt -->
+    <div id="passwordContainer" class="card">
+      <p id="passwordStatus">Checking password...</p>
+      <input type="password" id="devicePassword" placeholder="Enter password">
+      <button id="checkPasswordBtn">Submit</button>
+    </div>
 
-  <!-- App-only section -->
-  <div class="app-only" style="display:none;">
-    <div class="app-container">
-      <h2>Doormigo Dashboard</h2>
-
-      <!-- Password Setup / Prompt -->
-      <div id="passwordContainer" class="card">
-        <p id="passwordStatus">Checking password...</p>
-        <input type="password" id="devicePassword" placeholder="Enter password">
-        <button id="checkPasswordBtn">Submit</button>
+    <!-- Control Panel -->
+    <div id="controlPanel" class="card" style="display:none;">
+      <button id="connectBluetooth">Connect to DoorMigo</button>
+      <div id="bluetoothStatus">Not connected</div>
+      <div id="commandButtons" style="display:none; margin-top:10px;">
+        <button data-cmd="ON">Turn ON</button>
+        <button data-cmd="OFF">Turn OFF</button>
+        <button data-cmd="TOGGLE">Toggle</button>
       </div>
+    </div>
 
-      <!-- Bluetooth Connect Button -->
-      <div id="controlPanel" class="card" style="display:none;">
-        <button id="connectBluetooth">Connect to Bluetooth</button>
-        <div id="bluetoothStatus">Not connected</div>
-      </div>
+    <!-- ESP32 Messages -->
+    <div id="messages" class="card" style="display:none;">
+      <h3>ESP32 Messages</h3>
+      <div id="msgLog" style="max-height:150px; overflow:auto;"></div>
     </div>
   </div>
 
   <script>
-    // --- Service Worker Registration ---
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/doormigo/service-worker.js')
-        .then(() => console.log('Service Worker Registered'))
-        .catch(err => console.log('Service Worker Failed:', err));
-    }
-
-    // --- Helpers ---
-    function isInstalledPWA() {
-      return window.matchMedia('(display-mode: standalone)').matches
-          || window.navigator.standalone === true;
-    }
-
-    // --- Install Button ---
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (!isInstalledPWA()) installBtn.style.display = 'block';
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log('User choice:', result.outcome);
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-      }
-    });
-
-    // --- Show App Dashboard when PWA is installed ---
-    function updateUI() {
-      if (isInstalledPWA()) {
-        document.querySelectorAll('.web-only').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.app-only').forEach(el => el.style.display = 'flex');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', updateUI);
-    document.addEventListener('visibilitychange', updateUI);
-
-    // --- Password Setup ---
+    // --- App Password ---
     const PASSWORD_KEY = 'devicePassword';
     let storedPassword = localStorage.getItem(PASSWORD_KEY);
 
@@ -189,43 +113,74 @@
         localStorage.setItem(PASSWORD_KEY, entered);
         storedPassword = entered;
         passwordStatus.textContent = "Password set! Access granted.";
-        passwordContainer.style.display = "none";
-        controlPanel.style.display = "flex";
       } else {
         if (entered === storedPassword) {
           passwordStatus.textContent = "Password correct!";
-          passwordContainer.style.display = "none";
-          controlPanel.style.display = "flex";
         } else {
           passwordStatus.textContent = "Incorrect password!";
+          passwordInput.value = "";
+          return;
         }
       }
 
+      passwordContainer.style.display = "none";
+      controlPanel.style.display = "flex";
       passwordInput.value = "";
     });
 
-    // --- Web Bluetooth functionality ---
+    // --- BLE Connection ---
     const connectBtn = document.getElementById('connectBluetooth');
     const statusDiv = document.getElementById('bluetoothStatus');
+    const commandButtons = document.getElementById('commandButtons');
+    const msgLog = document.getElementById('msgLog');
 
-    connectBtn?.addEventListener('click', async () => {
-      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    let bleCharacteristic;
 
-      if (isIos) {
-        statusDiv.textContent = "Bluetooth is not supported on iPhone/iPad.";
-      } else if (!navigator.bluetooth) {
-        statusDiv.textContent = "Bluetooth is not supported in this browser.";
-        connectBtn.style.display = "none";
-      } else {
-        try {
-          const device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true
-          });
-          statusDiv.textContent = `Connected to: ${device.name || 'Unknown device'}`;
-        } catch (err) {
-          statusDiv.textContent = 'Connection failed';
-          console.error(err);
-        }
+    connectBtn.addEventListener('click', async () => {
+      if (!navigator.bluetooth) {
+        statusDiv.textContent = "Bluetooth not supported in this browser.";
+        return;
+      }
+
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ name: 'DoorMigo' }],
+          optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+        });
+        statusDiv.textContent = `Connecting to: ${device.name || 'DoorMigo'}`;
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+        bleCharacteristic = await service.getCharacteristic('abcd1234-5678-90ab-cdef-1234567890ab');
+
+        statusDiv.textContent = `Connected to: ${device.name || 'DoorMigo'}`;
+        commandButtons.style.display = 'flex';
+        document.getElementById('messages').style.display = 'block';
+
+        await bleCharacteristic.startNotifications();
+        bleCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+          const value = new TextDecoder().decode(event.target.value);
+          const msgDiv = document.createElement('div');
+          msgDiv.textContent = value;
+          msgLog.appendChild(msgDiv);
+          msgLog.scrollTop = msgLog.scrollHeight;
+        });
+
+      } catch (err) {
+        statusDiv.textContent = 'Connection failed';
+        console.error(err);
+      }
+    });
+
+    // --- Command Buttons ---
+    commandButtons.addEventListener('click', async (e) => {
+      if (!bleCharacteristic) return;
+      const cmd = e.target.dataset.cmd;
+      if (!cmd) return;
+      try {
+        await bleCharacteristic.writeValue(new TextEncoder().encode(cmd));
+      } catch(err) {
+        console.error(err);
       }
     });
   </script>
