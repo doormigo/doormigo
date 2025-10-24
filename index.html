@@ -1,16 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doormigo!</title>
+
+  <!-- Theme color for browser UI -->
+  <meta name="theme-color" content="#317EFB">
+
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Manifest -->
-  <link rel="manifest" href="/DoorBuddyV2/manifest.json">
   <link rel="manifest" href="/doormigo/manifest.json">
 
   <style>
     /* General App Styles */
-@@ -116,118 +116,118 @@
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #ffffff;
+      padding: 20px;
+    }
+
+    h1, h2, p, button {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+
+    button {
+      background-color: #317EFB;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #255bbf;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .card {
+      width: 100%;
+      background-color: #f7f7f7;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Doormigo!</h1>
+
+  <!-- Website-only section -->
+  <div class="web-only">
+    <p id="installMessage">
+      Install this app on your device by clicking the button below.  
+      If you are on a mobile device, press the Share button in Safari or use Chrome's install prompt and select "Add to Home Screen".
+    </p>
+    <button id="installBtn" style="display:none;">
+      Install App
+    </button>
+  </div>
+
+  <!-- App-only section -->
+  <div class="app-only" style="display:none;">
+    <div class="app-container">
+      <h2>Doormigo Dashboard</h2>
+
+      <!-- Password Setup / Prompt -->
+      <div id="passwordContainer" class="card">
+        <p id="passwordStatus">Checking password...</p>
+        <input type="password" id="devicePassword" placeholder="Enter password">
+        <button id="checkPasswordBtn">Submit</button>
+      </div>
+
+      <!-- Bluetooth Connect Button -->
+      <div id="controlPanel" class="card" style="display:none;">
+        <button id="connectBluetooth">Connect to Bluetooth</button>
+        <div id="bluetoothStatus">Not connected</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // --- Service Worker Registration ---
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/DoorBuddyV2/service-worker.js')
       navigator.serviceWorker.register('/doormigo/service-worker.js')
         .then(() => console.log('Service Worker Registered'))
         .catch(err => console.log('Service Worker Failed:', err));
