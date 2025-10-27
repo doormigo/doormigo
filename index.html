@@ -205,7 +205,9 @@
       passwordInput.value = "";
     });
 
-    // --- Web Bluetooth functionality ---
+        <!-- Replace the existing connectBtn handler with this updated Bluetooth logic -->
+    <script>
+    // (keep all other code from your index.html above unchanged)
     const connectBtn = document.getElementById('connectBluetooth');
     const statusDiv = document.getElementById('bluetoothStatus');
 
@@ -214,21 +216,125 @@
 
       if (isIos) {
         statusDiv.textContent = "Bluetooth is not supported on iPhone/iPad.";
-      } else if (!navigator.bluetooth) {
+        return;
+      }
+
+      if (!navigator.bluetooth) {
         statusDiv.textContent = "Bluetooth is not supported in this browser.";
         connectBtn.style.display = "none";
-      } else {
-        try {
-          const device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true
-          });
-          statusDiv.textContent = `Connected to: ${device.name || 'Unknown device'}`;
-        } catch (err) {
-          statusDiv.textContent = 'Connection failed';
-          console.error(err);
+        return;
+      }
+
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: ["12345678-1234-1234-1234-1234567890ab"] }],
+          optionalServices: ["12345678-1234-1234-1234-1234567890ab"]
+        });
+
+        device.addEventListener('gattserverdisconnected', () => {
+          statusDiv.textContent = "Bluetooth disconnected";
+          console.log("Device disconnected");
+        });
+
+        const server = await device.gatt.connect();
+        statusDiv.textContent = `Connected to: ${device.name || "ESP32"}`;
+
+        const service = await server.getPrimaryService("12345678-1234-1234-1234-1234567890ab");
+        const controlChar = await service.getCharacteristic("abcd1234-5678-90ab-cdef-1234567890ab");
+
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+
+        // start notifications
+        await controlChar.startNotifications();
+        controlChar.addEventListener("characteristicvaluechanged", event => {
+          const msg = decoder.decode(event.target.value);
+          console.log("Notification:", msg);
+          statusDiv.textContent = `ESP32: ${msg}`;
+          if (msg === "PIN_SET") {
+            statusDiv.textContent = "Device PIN set (provisioning succeeded).";
+          } else if (msg === "AUTH_OK") {
+            statusDiv.textContent = "Authenticated. Controls enabled.";
+          } else if (msg === "AUTH_FAIL") {
+            statusDiv.textContent = "Authentication failed. If you enabled provisioning on device, you can set PIN.";
+          }
+        });
+
+        // require an app password in localStorage (existing flow)
+        if (!storedPassword) {
+          statusDiv.textContent = "Please set an app password first (top of dashboard).";
+          return;
         }
+
+        // send AUTH:<password>
+        await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
+        statusDiv.textContent = "Sent authentication request...";
+
+        // Wait briefly for a response that indicates whether auth succeeded or provisioning needed.
+        const waitForAuth = (timeoutMs = 1500) => {
+          return new Promise((resolve) => {
+            let handled = false;
+            const onMsg = (event) => {
+              const m = decoder.decode(event.target.value);
+              if (m === "AUTH_OK" || m === "AUTH_FAIL" || m === "ERR_NOT_IN_PROV" || m === "PIN_SET") {
+                controlChar.removeEventListener("characteristicvaluechanged", onMsg);
+                handled = true;
+                resolve(m);
+              }
+            };
+            controlChar.addEventListener("characteristicvaluechanged", onMsg);
+            setTimeout(() => {
+              if (!handled) {
+                controlChar.removeEventListener("characteristicvaluechanged", onMsg);
+                resolve("timeout");
+              }
+            }, timeoutMs);
+          });
+        };
+
+        const authResult = await waitForAuth(1600);
+
+        if (authResult === "AUTH_OK") {
+          statusDiv.textContent = "Authenticated — controls enabled.";
+        } else if (authResult === "AUTH_FAIL" || authResult === "ERR_NOT_IN_PROV" || authResult === "timeout") {
+          // Ask user if they just enabled provisioning physically
+          const doProv = confirm("Authentication failed. If you pressed the device provisioning button (long-press), click OK to set the device's PIN now.");
+          if (doProv) {
+            // send SETPIN:<password>
+            await controlChar.writeValue(encoder.encode("SETPIN:" + storedPassword));
+            statusDiv.textContent = "Attempting to set device PIN (provisioning)...";
+            // We'll pick up PIN_SET notification above if successful
+          } else {
+            statusDiv.textContent = "Authentication failed. Cannot enable controls.";
+            return;
+          }
+        }
+
+        // Add control buttons if not present
+        if (!document.getElementById("cmdButtons")) {
+          const btnContainer = document.createElement("div");
+          btnContainer.id = "cmdButtons";
+          btnContainer.style.marginTop = "15px";
+          ["ON", "OFF", "TOGGLE"].forEach(cmd => {
+            const btn = document.createElement("button");
+            btn.textContent = cmd;
+            btn.addEventListener("click", async () => {
+              try {
+                await controlChar.writeValue(encoder.encode("CMD:" + cmd));
+                statusDiv.textContent = `Sent CMD:${cmd}`;
+              } catch (e) {
+                console.error(e);
+                statusDiv.textContent = `Failed to send ${cmd}`;
+              }
+            });
+            btnContainer.appendChild(btn);
+          });
+          controlPanel.appendChild(btnContainer);
+        }
+
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Connection failed";
       }
     });
-  </script>
-</body>
-</html>
+    </script>
