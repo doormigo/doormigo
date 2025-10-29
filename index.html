@@ -266,49 +266,40 @@
           return;
         }
 
-        // send AUTH:<password>
-        await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
-        statusDiv.textContent = "Sent authentication request...";
+       // Immediately check provisioning before AUTH
+let provisioningActive = false;
+const waitForProvision = (timeoutMs = 1500) => {
+  return new Promise((resolve) => {
+    let handled = false;
+    const onMsg = (event) => {
+      const m = decoder.decode(event.target.value);
+      if (m === "ERR_NOT_IN_PROV" || m === "PIN_SET") {
+        provisioningActive = true;
+        controlChar.removeEventListener("characteristicvaluechanged", onMsg);
+        handled = true;
+        resolve(m);
+      }
+    };
+    controlChar.addEventListener("characteristicvaluechanged", onMsg);
+    setTimeout(() => {
+      if (!handled) {
+        controlChar.removeEventListener("characteristicvaluechanged", onMsg);
+        resolve("timeout");
+      }
+    }, timeoutMs);
+  });
+};
 
-        // Wait briefly for a response that indicates whether auth succeeded or provisioning needed.
-        const waitForAuth = (timeoutMs = 1500) => {
-          return new Promise((resolve) => {
-            let handled = false;
-            const onMsg = (event) => {
-              const m = decoder.decode(event.target.value);
-              if (m === "AUTH_OK" || m === "AUTH_FAIL" || m === "ERR_NOT_IN_PROV" || m === "PIN_SET") {
-                controlChar.removeEventListener("characteristicvaluechanged", onMsg);
-                handled = true;
-                resolve(m);
-              }
-            };
-            controlChar.addEventListener("characteristicvaluechanged", onMsg);
-            setTimeout(() => {
-              if (!handled) {
-                controlChar.removeEventListener("characteristicvaluechanged", onMsg);
-                resolve("timeout");
-              }
-            }, timeoutMs);
-          });
-        };
+const provStatus = await waitForProvision(1600);
 
-        const authResult = await waitForAuth(1600);
-
-        if (authResult === "AUTH_OK") {
-          statusDiv.textContent = "Authenticated — controls enabled.";
-        } else if (authResult === "AUTH_FAIL" || authResult === "ERR_NOT_IN_PROV" || authResult === "timeout") {
-          // Ask user if they just enabled provisioning physically
-          const doProv = confirm("Authentication failed. If you pressed the device provisioning button (long-press), click OK to set the device's PIN now.");
-          if (doProv) {
-            // send SETPIN:<password>
-            await controlChar.writeValue(encoder.encode("SETPIN:" + storedPassword));
-            statusDiv.textContent = "Attempting to set device PIN (provisioning)...";
-            // We'll pick up PIN_SET notification above if successful
-          } else {
-            statusDiv.textContent = "Authentication failed. Cannot enable controls.";
-            return;
-          }
-        }
+if (provisioningActive) {
+  statusDiv.textContent = "Device in provisioning mode — sending PIN...";
+  await controlChar.writeValue(encoder.encode("SETPIN:" + storedPassword));
+} else {
+  // proceed with normal auth flow
+  await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
+  statusDiv.textContent = "Sent authentication request...";
+}
 
         // Add control buttons if not present
         if (!document.getElementById("cmdButtons")) {
