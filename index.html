@@ -207,84 +207,106 @@
     });
   </script>
         <!-- Replace the existing connectBtn handler with this updated Bluetooth logic -->
-    <script>
+
     // (keep all other code from your index.html above unchanged)
-   <script>
-const connectBtn = document.getElementById('connectBluetooth');
-const statusDiv = document.getElementById('bluetoothStatus');
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const statusDiv = document.getElementById('bluetoothStatus');
+  const controlPanel = document.getElementById('controlPanel');
 
-connectBtn?.addEventListener('click', async () => {
-  if (!navigator.bluetooth) {
-    statusDiv.textContent = "Bluetooth not supported in this browser.";
-    return;
-  }
-
-  try {
-    statusDiv.textContent = "Requesting DoorMigo device...";
-    const device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: ["12345678-1234-1234-1234-1234567890ab"] }]
-    });
-
-    device.addEventListener('gattserverdisconnected', () => {
-      statusDiv.textContent = "Disconnected.";
-      console.log("Bluetooth disconnected");
-    });
-
-    statusDiv.textContent = "Connecting...";
-    const server = await device.gatt.connect();
-    statusDiv.textContent = `Connected to ${device.name || "ESP32"}`;
-
-    const service = await server.getPrimaryService("12345678-1234-1234-1234-1234567890ab");
-    const controlChar = await service.getCharacteristic("abcd1234-5678-90ab-cdef-1234567890ab");
-
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
-
-    await controlChar.startNotifications();
-    controlChar.addEventListener("characteristicvaluechanged", event => {
-      const msg = decoder.decode(event.target.value);
-      console.log("Notification:", msg);
-      statusDiv.textContent = `ESP32: ${msg}`;
-      if (msg === "AUTH_OK") statusDiv.textContent = "Authenticated ✅";
-      if (msg === "AUTH_FAIL") statusDiv.textContent = "Auth failed ❌";
-    });
-
-    if (!storedPassword) {
-      statusDiv.textContent = "Set your app password first (top of dashboard).";
+  function attachBluetoothHandler() {
+    const connectBtn = document.getElementById('connectBluetooth');
+    if (!connectBtn) {
+      console.warn("⏳ Waiting for Connect button to exist...");
+      setTimeout(attachBluetoothHandler, 200);
       return;
     }
 
-    // Send authentication
-    await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
-    statusDiv.textContent = "Sent authentication request...";
+    console.log("✅ Bluetooth Connect button found, attaching listener");
 
-    // Add control buttons dynamically if not yet created
-    if (!document.getElementById("cmdButtons")) {
-      const btnContainer = document.createElement("div");
-      btnContainer.id = "cmdButtons";
-      btnContainer.style.marginTop = "15px";
+    connectBtn.addEventListener('click', async () => {
+      console.log("🔵 Connect button clicked");
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
 
-      ["ON", "OFF", "TOGGLE"].forEach(cmd => {
-        const btn = document.createElement("button");
-        btn.textContent = cmd;
-        btn.addEventListener("click", async () => {
-          try {
-            await controlChar.writeValue(encoder.encode("CMD:" + cmd));
-            statusDiv.textContent = `Sent CMD:${cmd}`;
-          } catch (e) {
-            console.error(e);
-            statusDiv.textContent = `Failed to send ${cmd}`;
-          }
+      if (isIos) {
+        statusDiv.textContent = "Bluetooth not supported on iPhone/iPad.";
+        return;
+      }
+
+      if (!navigator.bluetooth) {
+        statusDiv.textContent = "Bluetooth not supported in this browser.";
+        connectBtn.style.display = "none";
+        return;
+      }
+
+      try {
+        statusDiv.textContent = "Requesting DoorMigo device...";
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: ["12345678-1234-1234-1234-1234567890ab"] }],
+          optionalServices: ["12345678-1234-1234-1234-1234567890ab"]
         });
-        btnContainer.appendChild(btn);
-      });
 
-      controlPanel.appendChild(btnContainer);
-    }
+        device.addEventListener('gattserverdisconnected', () => {
+          statusDiv.textContent = "Bluetooth disconnected";
+          console.log("Device disconnected");
+        });
 
-  } catch (err) {
-    console.error(err);
-    statusDiv.textContent = "Connection failed. Please retry.";
+        const server = await device.gatt.connect();
+        statusDiv.textContent = `Connected to: ${device.name || "ESP32"}`;
+
+        const service = await server.getPrimaryService("12345678-1234-1234-1234-1234567890ab");
+        const controlChar = await service.getCharacteristic("abcd1234-5678-90ab-cdef-1234567890ab");
+
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+
+        await controlChar.startNotifications();
+        controlChar.addEventListener("characteristicvaluechanged", event => {
+          const msg = decoder.decode(event.target.value);
+          console.log("Notification:", msg);
+          statusDiv.textContent = `ESP32: ${msg}`;
+          if (msg === "AUTH_OK") statusDiv.textContent = "Authenticated ✅";
+          if (msg === "AUTH_FAIL") statusDiv.textContent = "Authentication failed ❌";
+        });
+
+        if (!storedPassword) {
+          statusDiv.textContent = "Please set an app password first (top of dashboard).";
+          return;
+        }
+
+        // Send AUTH command
+        await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
+        statusDiv.textContent = "Sent authentication request...";
+
+        // Add ON/OFF/TOGGLE buttons dynamically
+        if (!document.getElementById("cmdButtons")) {
+          const btnContainer = document.createElement("div");
+          btnContainer.id = "cmdButtons";
+          btnContainer.style.marginTop = "15px";
+          ["ON", "OFF", "TOGGLE"].forEach(cmd => {
+            const btn = document.createElement("button");
+            btn.textContent = cmd;
+            btn.addEventListener("click", async () => {
+              try {
+                await controlChar.writeValue(encoder.encode("CMD:" + cmd));
+                statusDiv.textContent = `Sent CMD:${cmd}`;
+              } catch (e) {
+                console.error(e);
+                statusDiv.textContent = `Failed to send ${cmd}`;
+              }
+            });
+            btnContainer.appendChild(btn);
+          });
+          controlPanel.appendChild(btnContainer);
+        }
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Connection failed";
+      }
+    });
   }
+
+  // Attach handler after DOM is ready
+  attachBluetoothHandler();
 });
 </script>
