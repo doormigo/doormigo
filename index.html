@@ -241,10 +241,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         statusDiv.textContent = "Requesting DoorMigo device...";
-        const device = await navigator.bluetooth.requestDevice({
-          filters: [{ services: ["12345678-1234-1234-1234-1234567890ab"] }],
-          optionalServices: ["12345678-1234-1234-1234-1234567890ab"]
-        });
+       const device = await navigator.bluetooth.requestDevice({
+  filters: [{ name: "DoorMigo" }],
+  optionalServices: ["12345678-1234-1234-1234-1234567890ab"]
+});
 
         device.addEventListener('gattserverdisconnected', () => {
           statusDiv.textContent = "Bluetooth disconnected";
@@ -300,9 +300,10 @@ document.addEventListener("DOMContentLoaded", () => {
           controlPanel.appendChild(btnContainer);
         }
       } catch (err) {
-        console.error(err);
-        statusDiv.textContent = "Connection failed";
-      }
+  console.error("Bluetooth connection error:", err);
+  statusDiv.textContent = "Connection failed: " + (err.message || err);
+}
+
     });
   }
 
