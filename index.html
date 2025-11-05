@@ -269,26 +269,27 @@ document.addEventListener("DOMContentLoaded", () => {
         // await controlChar.writeValue(encoder.encode("AUTH:" + storedPassword));
 
         // Add ON/OFF/TOGGLE buttons dynamically
-        if (!document.getElementById("cmdButtons")) {
-          const btnContainer = document.createElement("div");
-          btnContainer.id = "cmdButtons";
-          btnContainer.style.marginTop = "15px";
-          ["ON", "OFF", "TOGGLE"].forEach(cmd => {
-            const btn = document.createElement("button");
-            btn.textContent = cmd;
-            btn.addEventListener("click", async () => {
-              try {
-                await controlChar.writeValue(encoder.encode("CMD:" + cmd));
-                statusDiv.textContent = `Sent CMD:${cmd}`;
-              } catch (e) {
-                console.error(e);
-                statusDiv.textContent = `Failed to send ${cmd}`;
-              }
-            });
-            btnContainer.appendChild(btn);
-          });
-          controlPanel.appendChild(btnContainer);
-        }
+       if (!document.getElementById("cmdButtons")) {
+  const btnContainer = document.createElement("div");
+  btnContainer.id = "cmdButtons";
+  btnContainer.style.marginTop = "15px";
+
+  const openBtn = document.createElement("button");
+  openBtn.textContent = "Open Door";
+  openBtn.addEventListener("click", async () => {
+    try {
+      await controlChar.writeValue(encoder.encode("CMD:OPEN"));
+      statusDiv.textContent = `Sent CMD:OPEN`;
+    } catch (e) {
+      console.error(e);
+      statusDiv.textContent = `Failed to send OPEN`;
+    }
+  });
+
+  btnContainer.appendChild(openBtn);
+  controlPanel.appendChild(btnContainer);
+}
+
       } catch (err) {
         console.error("Bluetooth connection error:", err);
         statusDiv.textContent = "Connection failed: " + (err.message || err);
