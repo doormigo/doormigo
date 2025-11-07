@@ -108,8 +108,12 @@
       <div id="controlPanel" class="card" style="display:none;">
         <button id="connectBluetooth">Connect to Bluetooth</button>
         <div id="bluetoothStatus">Not connected</div>
+
+        <div id="dnd-banner" style="display:none; background:#ffcccc; padding:10px; margin-top:10px; border-radius:8px;">
+          <strong>Do Not Disturb is active.</strong>
+          <button id="dnd-deactivate" style="margin-left:10px;">Deactivate</button>
       </div>
-    </div>
+   </div>
   </div>
 
   <script>
@@ -252,17 +256,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const encoder = new TextEncoder();
 
         await controlChar.startNotifications();
-        controlChar.addEventListener("characteristicvaluechanged", event => {
-          const msg = decoder.decode(event.target.value);
-          console.log("Notification:", msg);
-          statusDiv.textContent = `ESP32: ${msg}`;
+     controlChar.addEventListener("characteristicvaluechanged", event => {
+  const msg = decoder.decode(event.target.value);
+  console.log("Notification:", msg);
 
-          // --- BLE AUTH messages commented out ---
-          /*
-          if (msg === "AUTH_OK") statusDiv.textContent = "Authenticated ✅";
-          if (msg === "AUTH_FAIL") statusDiv.textContent = "Authentication failed ❌";
-          */
-        });
+  if (msg.startsWith("DND:")) {
+    const active = msg === "DND:ON";
+    showDoNotDisturbBanner(active);
+  } else {
+    statusDiv.textContent = `ESP32: ${msg}`;
+  }
+});
+const deactivateBtn = document.getElementById("dnd-deactivate");
+deactivateBtn.addEventListener("click", async () => {
+  try {
+    await controlChar.writeValue(encoder.encode("CMD:DND_OFF"));
+    console.log("Sent CMD:DND_OFF");
+  } catch (err) {
+    console.error("Failed to send CMD:DND_OFF:", err);
+  }
+});
+
+function showDoNotDisturbBanner(active) {
+  const banner = document.getElementById("dnd-banner");
+  banner.style.display = active ? "block" : "none";
+}
 
         // --- Do not send AUTH over BLE anymore ---
         // if (!storedPassword) { ... }
