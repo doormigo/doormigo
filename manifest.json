@@ -1,6 +1,6 @@
 {
-  "name": "This is Doormigo!",
-  "short_name": "Dormigo",
+  "name": "Welcome to Doormigo!",
+  "short_name": "Doormigo",
   "start_url": "/doormigo/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
